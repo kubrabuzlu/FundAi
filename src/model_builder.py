@@ -25,7 +25,7 @@ def load_base_model(class_num: int, input_shape: Tuple[int, int, int], model_nam
     if model_name not in model_zoo:
         raise ValueError(f"Unsupported model: {model_name}")
 
-    base_model = model_zoo[model_name](include_top=False, input_shape=input_shape)
+    base_model = model_zoo[model_name](include_top=False, input_shape=input_shape, classes=class_num)
 
     for layer in base_model.layers:
         layer.trainable = True
