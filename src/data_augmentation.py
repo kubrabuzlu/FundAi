@@ -1,3 +1,4 @@
+import argparse
 import os
 import cv2
 import numpy as np
@@ -36,10 +37,10 @@ def augment_image(image: np.ndarray, augmenter: A.Compose) -> np.ndarray:
 
 
 def augment_class_images(
-    class_path: str,
-    desired_samples: int,
-    augmenter: A.Compose,
-    image_size: int = 512
+        class_path: str,
+        desired_samples: int,
+        augmenter: A.Compose,
+        image_size: int = 512
 ) -> None:
     """
     Perform data augmentation on images within a class folder until the desired number of samples is reached.
@@ -75,10 +76,10 @@ def augment_class_images(
 
 
 def augment_dataset(
-    dataset_path: str,
-    fold: str,
-    desired_samples: int,
-    augmenter: A.Compose
+        dataset_path: str,
+        fold: str,
+        desired_samples: int,
+        augmenter: A.Compose
 ) -> None:
     """
     Augment all image classes within a specific fold of the dataset to balance the number of samples per class.
@@ -103,10 +104,24 @@ def augment_dataset(
         print(f"Final image count for {class_name}: {len(os.listdir(class_path))}")
 
 
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments from the command line.
+    """
+    parser = argparse.ArgumentParser(description="Augment dataset using Albumentations")
+    parser.add_argument("--dataset_path", type=str, required=True, help="Path to the dataset directory (e.g., 'ODIR').")
+    parser.add_argument("--fold", type=str, default="fold1", help="Fold name under dataset (e.g., 'fold1').")
+    parser.add_argument("--desired_samples", type=int, default=10000, help="Target number of images per class.")
+    parser.add_argument("--image_size", type=int, default=512, help="Size to resize images before augmentation.")
+
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    DATASET_PATH = "ODIR"
-    FOLD = "fold1"
-    DESIRED_SAMPLES_PER_CLASS = 10000
+    args = parse_args()
 
     augmenter = A.Compose([
         A.HorizontalFlip(p=0.5),
@@ -114,4 +129,12 @@ if __name__ == "__main__":
         A.Rotate(p=0.5, interpolation=cv2.INTER_LINEAR, border_mode=cv2.BORDER_CONSTANT, value=0, mask_value=0),
     ])
 
-    augment_dataset(DATASET_PATH, FOLD, DESIRED_SAMPLES_PER_CLASS, augmenter)
+    augment_dataset(
+        dataset_path=args.dataset_path,
+        fold=args.fold,
+        desired_samples=args.desired_samples,
+        augmenter=augmenter,
+        image_size=args.image_size
+    )
+
+
